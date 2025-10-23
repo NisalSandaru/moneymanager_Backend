@@ -1,7 +1,10 @@
 package com.nisal.moneymanager.controller;
 
 import com.nisal.moneymanager.dto.ExpenseDTO;
+import com.nisal.moneymanager.entity.ExpenseEntity;
+import com.nisal.moneymanager.entity.ProfileEntity;
 import com.nisal.moneymanager.service.ExpenseService;
+import com.nisal.moneymanager.service.ProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +17,7 @@ import java.util.List;
 @RequestMapping("/expenses")
 public class ExpenseController {
     private final ExpenseService expenseService;
+    private final ProfileService profileService;
 
     @PostMapping
     public ResponseEntity<ExpenseDTO> addExpense(@RequestBody ExpenseDTO dto) {
@@ -32,5 +36,7 @@ public class ExpenseController {
         expenseService.deleteExpense(id);
         return ResponseEntity.noContent().build();
     }
+
+
 
 }
