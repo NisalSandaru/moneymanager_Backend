@@ -1,33 +1,94 @@
+//package com.nisal.moneymanager.service;
+//
+//import lombok.RequiredArgsConstructor;
+//import org.springframework.beans.factory.annotation.Value;
+//import org.springframework.mail.SimpleMailMessage;
+//import org.springframework.mail.javamail.JavaMailSender;
+//import org.springframework.stereotype.Service;
+//
+//@Service
+//@RequiredArgsConstructor
+//public class EmailService {
+//
+//    private final JavaMailSender mailSender;
+//
+//    @Value("${spring.mail.properties.mail.smtp.from}")
+//    private String fromEmail;
+//
+//    public void sendEmail(String to, String subject, String body) {
+//
+//        try {
+//            SimpleMailMessage message = new SimpleMailMessage();
+//            message.setFrom(fromEmail);
+//            message.setTo(to);
+//            message.setSubject(subject);
+//            message.setText(body);
+//            mailSender.send(message);
+//        }catch (Exception e) {
+//            throw new RuntimeException(e.getMessage());
+//        }
+//
+//    }
+//
+//}
+
+
 package com.nisal.moneymanager.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
 public class EmailService {
 
-    private final JavaMailSender mailSender;
+    private final RestTemplate restTemplate;
 
-    @Value("${spring.mail.properties.mail.smtp.from}")
+    // Load environment variables
+//    private final String apiKey = ${BREVO_API_KEY}
+//    private final String fromEmail = System.getenv("BREVO_FROM_EMAIL");
+//    private final String fromName = System.getenv("BREVO_FROM_NAME");
+
+    @Value("${BREVO_API_KEY}")
+    private String apiKey;
+
+    @Value("${BREVO_FROM_EMAIL}")
     private String fromEmail;
 
-    public void sendEmail(String to, String subject, String body) {
+    @Value("${BREVO_FROM_NAME}")
+    private String fromName;
+
+    /**
+     * Send email using Brevo API (HTTPS)
+     * @param to recipient email
+     * @param subject email subject
+     * @param htmlContent HTML body
+     */
+    public void sendEmail(String to, String subject, String htmlContent) {
+        String url = "https://api.brevo.com/v3/smtp/email";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("api-key", apiKey);
+
+        String body = "{"
+                + "\"sender\":{\"email\":\"" + fromEmail + "\",\"name\":\"" + fromName + "\"},"
+                + "\"to\":[{\"email\":\"" + to + "\"}],"
+                + "\"subject\":\"" + subject + "\","
+                + "\"htmlContent\":\"" + htmlContent + "\""
+                + "}";
+
+        HttpEntity<String> request = new HttpEntity<>(body, headers);
 
         try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
-            message.setTo(to);
-            message.setSubject(subject);
-            message.setText(body);
-            mailSender.send(message);
-        }catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+            System.out.println("Email sent! Status: " + response.getStatusCode());
+        } catch (Exception e) {
+            System.err.println("Failed to send email: " + e.getMessage());
+            // Optional: don't throw, allow registration to succeed
         }
-
     }
-
 }

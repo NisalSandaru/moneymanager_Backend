@@ -12,7 +12,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping()
+@RequestMapping
 public class ProfileController {
     private final ProfileService profileService;
 

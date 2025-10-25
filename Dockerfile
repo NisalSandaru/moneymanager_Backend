@@ -1,36 +1,24 @@
-#FROM eclipse-temurin:21-jre
-#WORKDIR /app
-#COPY target/moneymanager-0.0.1-SNAPSHOT.jar moneymanager-v1.0.jar
-#RUN mvn clean package -DskipTests
-#EXPOSE 9090
-#ENTRYPOINT ["java", "-jar", "moneymanager-v1.0.jar"]
-
 # Stage 1: Build the app
-FROM maven:3.9.6-eclipse-temurin-21 AS build
-
-# Set working directory inside container
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
 
-# Copy pom.xml and download dependencies first (for build caching)
+# Copy pom.xml first (for caching dependencies)
 COPY pom.xml .
 RUN mvn dependency:go-offline
 
-# Copy the source code
+# Copy source code and build
 COPY src ./src
-
-# Build the project and skip tests
 RUN mvn clean package -DskipTests
 
 # Stage 2: Run the app
 FROM eclipse-temurin:17-jre
-
 WORKDIR /app
 
-# Copy the built jar from the build stage
+# Copy the built jar
 COPY --from=build /app/target/moneymanager-0.0.1-SNAPSHOT.jar moneymanager-v1.0.jar
 
-# Expose port (Spring Boot default is 8080)
+# Expose the port (adjust if your app uses 8080 or 9090)
 EXPOSE 8080
 
-# Run the application
+# Run the app
 ENTRYPOINT ["java", "-jar", "moneymanager-v1.0.jar"]
