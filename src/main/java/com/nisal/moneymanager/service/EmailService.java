@@ -40,6 +40,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import java.util.Base64;
 
 @Service
 @RequiredArgsConstructor
@@ -90,5 +91,62 @@ public class EmailService {
             System.err.println("Failed to send email: " + e.getMessage());
             // Optional: don't throw, allow registration to succeed
         }
+    }
+
+
+    /**
+     * Send HTML email with an Excel file attachment
+     */
+    public void sendIncomeExcelWithAttachment(String to, String subject, String htmlContent, byte[] excelData) {
+        String url = "https://api.brevo.com/v3/smtp/email";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("api-key", apiKey);
+
+        String base64Excel = Base64.getEncoder().encodeToString(excelData);
+
+        String body = "{"
+                + "\"sender\":{\"email\":\"" + fromEmail + "\",\"name\":\"" + fromName + "\"},"
+                + "\"to\":[{\"email\":\"" + to + "\"}],"
+                + "\"subject\":\"" + subject + "\","
+                + "\"htmlContent\":\"" + htmlContent + "\","
+                + "\"attachment\":[{"
+                + "\"content\":\"" + base64Excel + "\","
+                + "\"name\":\"income_details.xlsx\""
+                + "}]"
+                + "}";
+
+        HttpEntity<String> request = new HttpEntity<>(body, headers);
+
+        restTemplate.postForEntity(url, request, String.class);
+    }
+
+    /**
+     * Send HTML email with an Excel file attachment
+     */
+    public void sendExpenseExcelWithAttachment(String to, String subject, String htmlContent, byte[] excelData) {
+        String url = "https://api.brevo.com/v3/smtp/email";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("api-key", apiKey);
+
+        String base64Excel = Base64.getEncoder().encodeToString(excelData);
+
+        String body = "{"
+                + "\"sender\":{\"email\":\"" + fromEmail + "\",\"name\":\"" + fromName + "\"},"
+                + "\"to\":[{\"email\":\"" + to + "\"}],"
+                + "\"subject\":\"" + subject + "\","
+                + "\"htmlContent\":\"" + htmlContent + "\","
+                + "\"attachment\":[{"
+                + "\"content\":\"" + base64Excel + "\","
+                + "\"name\":\"expense_details.xlsx\""
+                + "}]"
+                + "}";
+
+        HttpEntity<String> request = new HttpEntity<>(body, headers);
+
+        restTemplate.postForEntity(url, request, String.class);
     }
 }
