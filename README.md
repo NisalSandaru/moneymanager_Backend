@@ -149,6 +149,7 @@ It also supports **email notifications**, **Excel exports**, **JWT-based authent
 | **ExcelService** | Generates Excel reports via Apache POI |
 | **EmailService** | Sends activation and report emails through Brevo |
 | **CloudinaryService** | Handles image uploads and URLs |
+| **NotificationServise** |
 
 ---
 
